@@ -11,6 +11,9 @@ use std::env;
 
 #[tokio::main]
 async fn main() -> Result<(), ProviderError> {
+    info!("Initializing sodiumoxide");
+    crypto::init_sodium()?;
+
     env_logger::init();
     info!("Starting Gramine Sealing Key Provider");
 
