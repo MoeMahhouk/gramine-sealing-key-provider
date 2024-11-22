@@ -32,6 +32,8 @@ sgx.allowed_files = [
   "file:/etc/resolv.conf",
 ]
 
+sgx.enable_stats = {{ 'true' if log_level == 'debug' else 'false' }}
+
 sgx.trusted_files = [
   "file:{{ gramine.libos }}",
   "file:{{ self_exe }}",
@@ -41,6 +43,3 @@ sgx.trusted_files = [
 
 sgx.thread_num = 32
 sgx.max_threads = {{ '1' if env.get('EDMM', '0') == '1' else '32' }}
-
-# Enable enclave measurement for sealing
-sgx.enable_stats = true
