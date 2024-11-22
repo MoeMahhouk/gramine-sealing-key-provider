@@ -12,6 +12,7 @@ struct QuoteRequest {
 
 #[derive(Serialize, Deserialize)]
 struct QuoteResponse {
+    encrypted_key: Vec<u8>,
     provider_quote: Vec<u8>,
 }
 
@@ -72,6 +73,7 @@ async fn handle_connection(mut socket: TcpStream) -> Result<(), ProviderError> {
     
     // Prepare response
     let response = QuoteResponse {
+        encrypted_key: provider_response.encrypted_key,
         provider_quote: provider_response.provider_quote,
     };
 

@@ -24,7 +24,7 @@ sequenceDiagram
     participant SGX as SGX Sealing Provider
     participant PCCS as PCCS Server
 
-    Note over TDX: Generate keypair for<br/>response encryption
+    Note over TDX: Generate keypair
     Note over TDX: Include public key in<br/>quote's report data
     TDX->>SGX: Send TDX quote
     
@@ -40,14 +40,28 @@ sequenceDiagram
         Note over SGX: Verify TDX quote
     end
     
-    Note over SGX: Get local SGX quote
-    Note over SGX: Compare PPIDs
+    Note over SGX: Get initial SGX quote
+    Note over SGX: Early PPID verification
+    alt PPID Mismatch
+        SGX-->>TDX: Return error
+    end
+    
     Note over SGX: Extract measurements<br/>from TDX quote
     Note over SGX: Get SGX sealing key
     Note over SGX: Derive unique key using<br/>measurements
     Note over SGX: Extract public key from<br/>quote's report data
-    Note over SGX: Encrypt derived key<br/>with public key
-    SGX->>TDX: Return encrypted key
+    Note over SGX: Encrypt derived key<br/>with sealed box
+    Note over SGX: Calculate hash of<br/>encrypted key
+    Note over SGX: Get final quote with<br/>hash in report data
+    
+    SGX->>TDX: Return encrypted key and<br/>provider quote with hash
+    
+    Note over TDX: Verify provider quote
+    Note over TDX: Calculate hash of<br/>encrypted key
+    Note over TDX: Compare with hash in<br/>provider quote
+    alt Hash Mismatch
+        TDX-->>TDX: Abort - tampered data
+    end
     Note over TDX: Decrypt key using<br/>private key
 ```
 
@@ -84,24 +98,27 @@ make SGX=1 DEBUG=1 DEV_MODE=1
 ### Development/Testing Mode
 
 ```bash
-# Create directory for test quotes
-mkdir -p /quotes
-
 # Copy your TDX quote
 cp /path/to/your/tdx_quote /quotes/
 
 # Run the provider in development mode
-make SGX=1 DEV_MODE=1 run-provider QUOTE_PATH=/quotes/tdx_quote
+make SGX=1 DEV_MODE=1 run-provider
 
 # With debug logging
-make SGX=1 DEBUG=1 DEV_MODE=1 run-provider QUOTE_PATH=/quotes/tdx_quote
+make SGX=1 DEBUG=1 DEV_MODE=1 run-provider
 ```
 
 ### Production Mode
 
 ```bash
 # Run the provider with full security features
-make SGX=1 run-provider QUOTE_PATH=/quotes/tdx_quote
+make SGX=1 run-provider
+```
+
+### Testing
+```bash
+# Run the test client python that wraps your quote and sends it to the SGX sealing provider through TCP
+python test_client.py
 ```
 
 ### Output
@@ -142,8 +159,6 @@ The service outputs the encrypted derived key in hexadecimal format to stdout. I
 - Public key encryption of derived keys
 - Development mode clearly marked with warnings
 - Measurement-based key derivation provides unique keys per TDX workload
-
-[Rest of the README remains the same...]
 
 ## Future Work
 

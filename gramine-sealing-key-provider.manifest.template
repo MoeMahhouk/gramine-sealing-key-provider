@@ -8,7 +8,7 @@ loader.env.LD_LIBRARY_PATH = "/lib:{{ arch_libdir }}"
 loader.env.MALLOC_ARENA_MAX = "1"
 loader.env.RUST_BACKTRACE = "full"
 # Set RUST_LOG based on Gramine log level
-loader.env.RUST_LOG = "{{ 'debug' if log_level == 'debug' else 'info' }}"
+loader.env.RUST_LOG = "{{ rust_log }}"
 
 fs.mounts = [
   { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },

@@ -7,10 +7,13 @@ use dcap_qvl::{
     verify::verify,
 };
 use log::{debug, error, info, warn};
+use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ProviderResponse {
+    pub encrypted_key: Vec<u8>,
     pub provider_quote: Vec<u8>,
 }
 
@@ -24,12 +27,12 @@ pub async fn process_quotes(tdx_quote_data: &[u8]) -> Result<ProviderResponse, P
 
     // 2. Parse TDX quote early
     let tdx_quote = parse_quote(tdx_quote_data.to_vec())?;
-    
+
     // 3. Get initial provider quote (without encrypted key)
     info!("Getting initial provider quote for PPID verification");
-    let initial_provider_quote = get_quote_with_data(&[])?;  // Empty user data
+    let initial_provider_quote = get_quote_with_data(&[])?; // Empty user data
     let provider_quote_parsed = parse_quote(initial_provider_quote)?;
-    
+
     // 4. Early PPID verification
     info!("Performing early PPID verification");
     verify_ppid_match(&provider_quote_parsed.quote, &tdx_quote.quote)?;
@@ -44,16 +47,36 @@ pub async fn process_quotes(tdx_quote_data: &[u8]) -> Result<ProviderResponse, P
     let public_key = extract_public_key(report_data)?;
     let encrypted_key = encrypt_key(&derived_key, &public_key)?;
 
-    // 7. Get final quote with encrypted key in user report data
-    debug!("Getting final quote with encrypted key in report data");
-    let final_provider_quote = get_quote_with_data(&encrypted_key)?;
+    // Calculate hash of encrypted key
+    let hash = calculate_hash(&encrypted_key);
+
+    // 7. Get final quote with hash in user report data
+    debug!("Getting final quote with hash in report data");
+    let final_provider_quote = get_quote_with_data(&hash)?;
 
     info!("Successfully processed quote and generated response");
-    debug!("Final provider quote length: {} bytes", final_provider_quote.len());
+    debug!(
+        "Final provider quote length: {} bytes",
+        final_provider_quote.len()
+    );
 
     Ok(ProviderResponse {
+        encrypted_key,
         provider_quote: final_provider_quote,
     })
+}
+
+fn calculate_hash(encrypted_key: &[u8]) -> Vec<u8> {
+    let mut hasher = Sha256::new();
+    hasher.update(encrypted_key);
+    let hash = hasher.finalize();
+
+    // Create 64-byte user report data
+    let mut report_data = [0u8; 64];
+    report_data[..32].copy_from_slice(&hash);
+
+    debug!("Hash of encrypted key: {}", hex::encode(&hash));
+    report_data.to_vec()
 }
 
 fn parse_quote(data: Vec<u8>) -> Result<QuoteData, ProviderError> {
@@ -69,7 +92,7 @@ async fn verify_quote(quote_data: &[u8]) -> Result<(), ProviderError> {
         warn!("Skipping quote verification in dev mode");
         return Ok(());
     }
-    
+
     debug!("Verifying quote with DCAP");
 
     let collateral = get_collateral_from_pcs(quote_data, std::time::Duration::from_secs(10))

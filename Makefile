@@ -20,8 +20,10 @@ endif
 
 ifeq ($(DEBUG),1)
 GRAMINE_LOG_LEVEL = debug
+RUST_LOG = debug
 else
 GRAMINE_LOG_LEVEL = error
+RUST_LOG = error
 endif
 
 # Print build mode information
@@ -34,13 +36,14 @@ print-mode:
 	@echo "  Cargo Flags: $(CARGO_FLAGS)"
 
 $(SELF_EXE): Cargo.toml print-mode
-	cargo build --release $(CARGO_FLAGS)
+	RUST_LOG=$(RUST_LOG) cargo build --release $(CARGO_FLAGS)
 
 gramine-sealing-key-provider.manifest: gramine-sealing-key-provider.manifest.template
 	gramine-manifest \
 		-Dlog_level=$(GRAMINE_LOG_LEVEL) \
 		-Darch_libdir=$(ARCH_LIBDIR) \
 		-Dself_exe=$(SELF_EXE) \
+		-Drust_log=$(RUST_LOG) \
 		$< $@
 
 gramine-sealing-key-provider.manifest.sgx gramine-sealing-key-provider.sig: sgx_sign

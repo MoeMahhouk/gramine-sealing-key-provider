@@ -41,43 +41,9 @@ pub fn encrypt_key(derived_key: &[u8], public_key: &PublicKey) -> Result<Vec<u8>
     debug!("Input key length: {} bytes", derived_key.len());
     
     let encrypted = sealedbox::seal(derived_key, public_key);
-    
+
     debug!("Encrypted data length: {} bytes", encrypted.len());
     debug!("Encrypted data (hex): {}", hex::encode(&encrypted));
     
     Ok(encrypted)
 }
-
-/*pub fn encrypt_key(derived_key: &[u8], public_key: &PublicKey) -> Result<Vec<u8>, ProviderError> {
-    info!("Encrypting derived key using NaCl box");
-    debug!("Input key length: {} bytes", derived_key.len());
-    debug!("Public key: {:?}", hex::encode(public_key.as_ref()));
-
-    // Generate ephemeral keypair for encryption
-    let (ephemeral_pk, ephemeral_sk) = box_::gen_keypair();
-    
-    // Generate nonce
-    let nonce = box_::gen_nonce();
-    
-    // Encrypt the derived key
-    let encrypted = box_::seal(
-        derived_key,
-        &nonce,
-        public_key,
-        &ephemeral_sk
-    );
-
-    // Format the response: ephemeral_pk + nonce + ciphertext
-    let mut result = Vec::with_capacity(
-        box_::PUBLICKEYBYTES + // ephemeral public key
-        box_::NONCEBYTES +     // nonce
-        encrypted.len()        // ciphertext
-    );
-    
-    result.extend_from_slice(ephemeral_pk.as_ref());
-    result.extend_from_slice(nonce.as_ref());
-    result.extend_from_slice(&encrypted);
-
-    debug!("Final encrypted data length: {} bytes", result.len());
-    Ok(result)
-}*/
