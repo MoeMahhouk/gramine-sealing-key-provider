@@ -26,11 +26,11 @@ loader.env.TOKIO_WORKER_THREADS = "1"
 
 sys.insecure__allow_eventfd = true
 
+# Turn on /etc/resolv.conf emulation
+sys.enable_extra_runtime_domain_names_conf = true
+
 # Required files and devices for quote generation and key access
-sgx.allowed_files = [
-  "file:/etc/hosts",
-  "file:/etc/resolv.conf",
-]
+sgx.allowed_files = []
 
 sgx.enable_stats = {{ 'true' if log_level == 'debug' else 'false' }}
 
