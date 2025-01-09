@@ -41,5 +41,4 @@ sgx.trusted_files = [
   "file:{{ arch_libdir }}/",
 ]
 
-sgx.thread_num = 32
 sgx.max_threads = {{ '1' if env.get('EDMM', '0') == '1' else '32' }}
