@@ -1,6 +1,7 @@
 # Gramine Sealing Key Provider
 
 A stateless service that provides sealing key functionality for TDX (Trust Domain Extensions) workloads using an SGX (Software Guard Extensions) enclave as a key provider.
+You can read more about this tool in this [blog post](https://collective.flashbots.net/t/loose-seal-enabling-crash-tolerant-tdx-applications-by-utilizing-sgx-sealing-provider-sidecar/4243).
 
 ## Overview
 
