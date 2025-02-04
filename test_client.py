@@ -87,7 +87,6 @@ def send_quote(host='localhost', port=3443, quote_path='quotes/tdxQuote.txt'):
     request_json = json.dumps(request).encode()
     
     print("\nConnecting to server...")
-    # Connect and send
     with socket.create_connection((host, port)) as sock:
         print(f"Connected to {host}:{port}")
         
@@ -101,21 +100,44 @@ def send_quote(host='localhost', port=3443, quote_path='quotes/tdxQuote.txt'):
         resp_len = struct.unpack('>I', sock.recv(4))[0]
         print(f"Expected response length: {resp_len} bytes")
         
-        # Read response
-        response = sock.recv(resp_len)
+        # Read response in chunks
+        chunks = []
+        bytes_received = 0
+        while bytes_received < resp_len:
+            chunk = sock.recv(min(4096, resp_len - bytes_received))
+            if not chunk:
+                raise RuntimeError(f"Connection closed after receiving {bytes_received} of {resp_len} bytes")
+            chunks.append(chunk)
+            bytes_received += len(chunk)
+            print(f"Received chunk of {len(chunk)} bytes. Total: {bytes_received}/{resp_len}")
         
-        # Parse response
-        resp_data = json.loads(response)
+        # Combine chunks
+        response = b''.join(chunks)
         
-        print("\nResponse received:")
-        encrypted_key = bytes(resp_data['encrypted_key'])
-        provider_quote = bytes(resp_data['provider_quote'])
+        print(f"\nTotal response size: {len(response)} bytes")
         
-        hex_print("Encrypted key", encrypted_key)
-        hex_print("Provider quote", provider_quote)
-        
-        print("\nVerifying response...")
-        verify_response(encrypted_key, provider_quote)
+        try:
+            # Parse response
+            resp_data = json.loads(response)
+            
+            print("\nResponse received:")
+            encrypted_key = bytes(resp_data['encrypted_key'])
+            provider_quote = bytes(resp_data['provider_quote'])
+            
+            hex_print("Encrypted key", encrypted_key)
+            hex_print("Provider quote", provider_quote)
+            
+            print("\nVerifying response...")
+            verify_response(encrypted_key, provider_quote)
+            
+        except json.JSONDecodeError as e:
+            print(f"\nJSON Parse Error: {e}")
+            print(f"Error position in response: {e.pos}")
+            print(f"Response snippet around error:")
+            start = max(0, e.pos - 20)
+            end = min(len(response), e.pos + 20)
+            print(response[start:end].hex())
+            raise
 
 def main():
     # Parse command line arguments
@@ -133,4 +155,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

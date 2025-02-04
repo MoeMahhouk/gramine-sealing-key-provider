@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  gramine-sealing-key-provider:
+    build:
+      context: .
+      args:
+        SGX: 1
+        DEBUG: 0
+        DEV_MODE: 0
+        GRAMINE: gramine-sgx
+    privileged: true
+    image: gramine-sealing-key-provider:latest
+    ports:
+      - "3443:3443"
+    devices:
+      - "/dev/sgx_enclave:/dev/sgx_enclave"
+      - "/dev/sgx_provision:/dev/sgx_provision"
+    volumes:
+      - "/var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket"
+    environment:
+      - RUST_LOG=info
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
