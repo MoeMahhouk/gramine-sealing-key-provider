@@ -5,9 +5,13 @@ use std::process;
 use std::sync::Mutex;
 
 static ATTESTATION_LOCK: Mutex<()> = Mutex::new(());
+// OS error 13; libc name is EACCES (permission denied).
+const OS_ERROR_EACCES: i32 = 13;
 
 fn exit_on_permission_denied(context: &str, err: &std::io::Error) {
-    if err.kind() == std::io::ErrorKind::PermissionDenied || err.raw_os_error() == Some(13) {
+    if err.kind() == std::io::ErrorKind::PermissionDenied
+        || err.raw_os_error() == Some(OS_ERROR_EACCES)
+    {
         error!(
             "Fatal: permission denied {context}; exiting to trigger restart"
         );
