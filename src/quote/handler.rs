@@ -95,7 +95,7 @@ async fn verify_quote(quote_data: &[u8]) -> Result<(), ProviderError> {
 
     debug!("Verifying quote with DCAP");
 
-    let collateral = get_collateral_from_pcs(quote_data, std::time::Duration::from_secs(10))
+    let collateral = get_collateral_from_pcs(quote_data)
         .await
         .map_err(|_| ProviderError::QuoteVerificationError)?;
 

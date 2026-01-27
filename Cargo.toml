@@ -7,7 +7,7 @@ edition = "2021"
 dev-mode = []
 
 [dependencies]
-dcap-qvl = "0.2.0"
+dcap-qvl = "0.3.10"
 base64 = "0.22.1"
 sha2 = "0.10"
 thiserror = "2.0.3"
