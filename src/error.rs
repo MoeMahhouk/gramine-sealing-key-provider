@@ -31,6 +31,13 @@ pub enum ProviderError {
 
     #[error("Crypto error: {0}")]
     CryptoError(String),
+
+    #[error("restart required: permission denied {context}")]
+    RestartRequired {
+        context: String,
+        #[source]
+        source: std::io::Error,
+    },
 }
 
 impl From<serde_json::Error> for ProviderError {

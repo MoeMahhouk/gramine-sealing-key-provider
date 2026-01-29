@@ -1,6 +1,7 @@
 use crate::error::ProviderError;
 use crate::quote::process_quotes;
 use log::{debug, error, info};
+use std::process;
 use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
@@ -38,7 +39,18 @@ impl Server {
             
             tokio::spawn(async move {
                 if let Err(e) = handle_connection(socket).await {
-                    error!("Connection error from {}: {}", peer_addr, e);
+                    match e {
+                        ProviderError::RestartRequired {
+                            ref context,
+                            ref source,
+                        } => {
+                            error!(
+                                "permission denied {context}: {source}; exiting to trigger restart"
+                            );
+                            process::exit(1);
+                        }
+                        _ => error!("connection error from {}: {}", peer_addr, e),
+                    }
                 }
             });
         }
