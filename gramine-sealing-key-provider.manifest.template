@@ -1,5 +1,4 @@
 # Gramine manifest template for Sealing Key Provider
-loader.entrypoint = "file:{{ gramine.libos }}"
 libos.entrypoint = "{{ self_exe }}"
 
 loader.log_level = "{{ log_level }}"
@@ -35,7 +34,6 @@ sgx.allowed_files = []
 sgx.enable_stats = {{ 'true' if log_level == 'debug' else 'false' }}
 
 sgx.trusted_files = [
-  "file:{{ gramine.libos }}",
   "file:{{ self_exe }}",
   "file:{{ gramine.runtimedir() }}/",
   "file:{{ arch_libdir }}/",

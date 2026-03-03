@@ -1,6 +1,6 @@
-FROM gramineproject/gramine:v1.5@sha256:615849089db84477f03cd13209c08eaf6b6a3a68b4df733e097db56781935589
+FROM gramineproject/gramine:1.9-jammy@sha256:84b3d222e0bd9ab941f0078a462af0dbc5518156b99b147c10a7b83722ac0c38
 
-# Install Rust 1.80 and build dependencies
+# Install Rust 1.85 and build dependencies
 RUN apt-get update && apt-get install -y \
     build-essential=12.8ubuntu1.1 \
     && rm -rf /var/lib/apt/lists/*
