@@ -2,7 +2,7 @@ FROM gramineproject/gramine:1.9-jammy@sha256:84b3d222e0bd9ab941f0078a462af0dbc55
 
 # Install Rust 1.85 and build dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
+    build-essential=12.9ubuntu3 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain 1.85 -y
