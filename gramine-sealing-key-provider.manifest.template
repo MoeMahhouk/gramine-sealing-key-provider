@@ -1,5 +1,4 @@
 # Gramine manifest template for Sealing Key Provider
-loader.entrypoint = "file:{{ gramine.libos }}"
 libos.entrypoint = "{{ self_exe }}"
 
 loader.log_level = "{{ log_level }}"
@@ -24,8 +23,6 @@ sgx.remote_attestation = "dcap"
 # Reduce number of worker threads for tokio
 loader.env.TOKIO_WORKER_THREADS = "1"
 
-sys.insecure__allow_eventfd = true
-
 # Turn on /etc/resolv.conf emulation
 sys.enable_extra_runtime_domain_names_conf = true
 
@@ -35,7 +32,6 @@ sgx.allowed_files = []
 sgx.enable_stats = {{ 'true' if log_level == 'debug' else 'false' }}
 
 sgx.trusted_files = [
-  "file:{{ gramine.libos }}",
   "file:{{ self_exe }}",
   "file:{{ gramine.runtimedir() }}/",
   "file:{{ arch_libdir }}/",

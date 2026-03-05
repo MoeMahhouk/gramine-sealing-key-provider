@@ -69,8 +69,8 @@ sequenceDiagram
 ## Prerequisites
 
 - Intel CPU with SGX and TDX support
-- Gramine installed (version 1.5 or higher)
-- Rust toolchain (tested with rustc 1.82.0)
+- Gramine installed (version 1.9 or higher)
+- Rust toolchain (tested with rustc 1.85.0)
 - DCAP driver and related software stack
 - Linux environment (Ubuntu 22.04 LTS)
 
